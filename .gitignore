@@ -1,0 +1,10 @@
+Ignore.robot
+*.png
+*.html
+*.xml
+*.iml
+*.jpg
+.idea
+pabot_results
+.pabotsuitenames
+geckodriver.log
