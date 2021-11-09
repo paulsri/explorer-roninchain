@@ -80,8 +80,13 @@ count file in folder
 
 clean error screen
 	[Arguments]             ${folderPath}
-	${total}                count file in folder    ${folderPath}   png
-	FOR     ${i}    IN RANGE   ${total}
+	${totalPng}             count file in folder    ${folderPath}   png
+	FOR     ${i}    IN RANGE   ${totalPng}
 		${index}            evaluate        ${i}+1
 		remove files        ${exec_dir}/TRASH/selenium-screenshot-${index}.png
+	END
+	${totalLog}             count file in folder    ${folderPath}   log
+	FOR     ${i}    IN RANGE   ${totalLog}
+		${index}            evaluate        ${i}+1
+		remove files        ${exec_dir}/TRASH/geckodriver-${index}.log
 	END

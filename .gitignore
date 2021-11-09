@@ -4,7 +4,7 @@ Ignore.robot
 *.xml
 *.iml
 *.jpg
+*.log
 .idea
 pabot_results
 .pabotsuitenames
-geckodriver.log

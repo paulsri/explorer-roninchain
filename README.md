@@ -1,11 +1,5 @@
 # I. OVERVIEW:
-- Automation for Ronin wallet on Browser: Chrome & Firefox
-- Test case:
-> Create wallet  
-> Import wallet  
-> Redirect screen  
-> Send asset  
-> Wallet setting
+- Automation for Explorer Roninchain
 - Report test result to discord: https://discord.gg/e7eKWJKU5S
 
 # II. SET UP:
