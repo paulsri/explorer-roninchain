@@ -14,6 +14,8 @@
 - OperatingSystem
 - String
 - Collections
+- DatabaseLibrary: pip install robotframework-databaselibrary
+- psycopg2: pip install psycopg2-binary 
 
 ## 3. Ignore.robot: this file includes secret key
 - phrase: 12-word Secret Recovery Phrase to import wallet

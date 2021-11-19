@@ -3,7 +3,7 @@ Library         SeleniumLibrary
 Library         RequestsLibrary
 Library         DebugLibrary
 Library         JSONLibrary
-Resource        ${exec_dir}/RESOURCE/GlobalKey.robot
+Resource        ../RESOURCE/GlobalKey.robot
 
 *** Variables ***
 ${homeUrl}              https://explorer.roninchain.com/

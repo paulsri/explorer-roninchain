@@ -7,8 +7,8 @@ Library     DebugLibrary
 Library     String
 Library     JSONLibrary
 Library     Collections
-Resource    ${exec_dir}/Ignore.robot
-Resource    ${exec_dir}/RESOURCE/GlobalKey.robot
+Resource    ../Ignore.robot
+Resource    ../RESOURCE/GlobalKey.robot
 
 *** Variables ***
 ${reportStatus}             //*[contains(@onClick,'totalDetailSelected()')]
@@ -21,7 +21,7 @@ capture report file
     ${status}               get text                ${reportStatus}
     capture page screenshot                         Report.jpg
     close all browsers
-    ${reportImage}          set variable            ${exec_dir}/TRASH/Report.jpg
+    ${reportImage}          set variable            ../TRASH/Report.jpg
     set global variable     ${reportImage}
     set global variable     ${status}
 
@@ -41,14 +41,14 @@ push report to discord
 push error screen to discord
 	[Arguments]             ${channelID}            ${botToken}
 	${latestFileName}       get latest file name discord    ${channelID}            ${botToken}
-	${index}                count file in folder    ${exec_dir}/TRASH      png
+	${index}                count file in folder    ../TRASH      png
 	IF  ${index}!=0
 		${header}           create dictionary       Authorization   ${botToken}
 	    create session      discord                 https://discordapp.com       headers=${header}      disable_warnings=1
 	    ${temp}             evaluate                ${index}-1
-	    ${currentFileName}  latest file in folder   ${exec_dir}/TRASH      png      ${temp}
+	    ${currentFileName}  latest file in folder   ../TRASH      png      ${temp}
 	    IF  '${latestFileName}'!='${currentFileName}'
-		    ${file}         get file for streaming upload       ${exec_dir}/TRASH/selenium-screenshot-${index}.png
+		    ${file}         get file for streaming upload       ../TRASH/selenium-screenshot-${index}.png
 		    ${file}         create dictionary       files       ${file}
 		    ${res}          post on session         discord     /api/channels/${channelID}/messages       files=${file}
 		END
@@ -83,10 +83,10 @@ clean error screen
 	${totalPng}             count file in folder    ${folderPath}   png
 	FOR     ${i}    IN RANGE   ${totalPng}
 		${index}            evaluate        ${i}+1
-		remove files        ${exec_dir}/TRASH/selenium-screenshot-${index}.png
+		remove files        ../TRASH/selenium-screenshot-${index}.png
 	END
 	${totalLog}             count file in folder    ${folderPath}   log
 	FOR     ${i}    IN RANGE   ${totalLog}
 		${index}            evaluate        ${i}+1
-		remove files        ${exec_dir}/TRASH/geckodriver-${index}.log
+		remove files        ../TRASH/geckodriver-${index}.log
 	END

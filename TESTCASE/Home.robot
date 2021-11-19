@@ -1,11 +1,11 @@
 *** Settings ***
-Resource        ${exec_dir}/RESOURCE/Home.robot
-Resource        ${exec_dir}/RESOURCE/GlobalKey.robot
+Resource        ../RESOURCE/Home.robot
+Resource        ../RESOURCE/GlobalKey.robot
 Library         SeleniumLibrary
 
 *** Test Cases ***
 home page chrome
-	go to home page         headlessChrome
+	go to home page         Chrome
 	maximize browser window
 	overview api response
 	overview ui render

@@ -1,5 +1,5 @@
 *** Settings ***
-Resource    ${exec_dir}/RESOURCE/Report.robot
+Resource    ../RESOURCE/Report.robot
 
 *** Test Cases ***
 ronin quick test

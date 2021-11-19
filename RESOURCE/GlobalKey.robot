@@ -1,10 +1,12 @@
 *** Settings ***
 Library             SeleniumLibrary
+Library             RequestsLibrary
+Library             REST
 Library             JSONLibrary
 Library             String
 Library             Collections
-Resource            ${exec_dir}/RESOURCE/Report.robot
-Resource            ${exec_dir}/Ignore.robot
+Resource            ../RESOURCE/Report.robot
+Resource            ../Ignore.robot
 
 *** Variables ***
 ${domain}                   https://explorer.roninchain.com
@@ -12,6 +14,10 @@ ${domain}                   https://explorer.roninchain.com
 ${timeout}                  10s
 ${retry}                    10
 ${sleep}                    5s
+${explorerStgV2}            https://staging.axieinfinity.co/explorer-test
+${internalRPC}              https://api-internal.roninchain.com/rpc
+${explorerProd}             https://explorer.roninchain.com/api
+${prodRPC}                  https://api.roninchain.com/rpc
 
 *** Keywords ***
 call api success
@@ -51,5 +57,19 @@ get value json and remove string
 	[Arguments]             ${jsonObject}   ${jsonPath}
 	${value}                get value from json     ${jsonObject}   ${jsonPath}
 	${value}                convert to string       ${value}
-	${value}                remove string           ${value}        [   '   '   ]
+	${value}                remove string           ${value}        [   '   '   ]   ,   ${space}
 	[Return]                ${value}
+
+convert number to hex
+    [Arguments]         ${number}
+    ${number}           convert to hex          ${number}
+    [Return]            ${number}
+
+convert hex to number
+    [Arguments]         ${hex}
+    ${hex}              convert to integer      ${hex}
+    ${hex}              convert to string       ${hex}
+    [Return]            ${hex}
+
+connect postgres v2
+    connect to database    psycopg2    axie    postgres    axie    127.0.0.1    dbPort=5432
