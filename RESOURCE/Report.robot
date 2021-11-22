@@ -25,6 +25,11 @@ capture report file
     set global variable     ${reportImage}
     set global variable     ${status}
 
+push text to discord
+    [Arguments]             ${channelID}            ${botToken}     ${text}
+    Set Headers             {"Authorization":"${botToken}"}
+    REST.post               https://discordapp.com/api/channels/${channelID}/messages       {"content":"${text}"}
+
 push report to discord
 	[Arguments]             ${channelID}            ${botToken}
     ${header}               create dictionary       Authorization   ${botToken}

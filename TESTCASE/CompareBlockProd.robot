@@ -3,6 +3,7 @@ Library         REST
 Library         JSONLibrary
 Library         DebugLibrary
 Library         DatabaseLibrary
+Library         FakerLibrary
 Library         String
 Resource        ../RESOURCE/GlobalKey.robot
 
@@ -11,6 +12,8 @@ get data block from es
     [Arguments]         ${blockNum}
     ${res}              REST.get     ${explorerProd}/block/${blockNum}
     set global variable  ${res}
+    ${timeES}           get value json and remove string   ${res}       $..seconds
+    set global variable     ${timeES}
     ${statusCode}           get value from json         ${res}              $..status
     ${statusCode}           get from list               ${statusCode}       0
 	set global variable     ${statusCode}
@@ -34,34 +37,17 @@ get data block from es
     set global variable     ${gasUsed}
     ${size}             get value json and remove string   ${res}       $..size
     set global variable     ${size}
-    ${txs}              get value json and remove string   ${res}       $..transactions
-    set global variable     ${txs}
-
-get count txs of block from es
-    [Arguments]         ${blockNum}
-    ${res}              REST.get     ${explorerProd}/txs?block=${blockNum}
-    set global variable  ${res}
-    ${statusCode}           get value from json         ${res}              $..status
-    ${statusCode}           get from list               ${statusCode}       0
-	set global variable     ${statusCode}
-    ${total}             get value json and remove string   ${res}       $..total
-    set global variable     ${total}
-
-dictionary for rpc call block
-    [Arguments]         ${blockHex}
-    ${rpcCall}          create dictionary       jsonrpc     2.0
-    ${rpcCall}          set to dictionary       ${rpcCall}  method      eth_getBlockByNumber
-    ${rpcCall}          set to dictionary       ${rpcCall}  params      ["0x${blockHex}",true]
-    ${rpcCall}          set to dictionary       ${rpcCall}  id          1
-    set global variable     ${rpcCall}
+    ${txsBlock}         get value json and remove string   ${res}       $..transactions
+    set global variable     ${txsBlock}
 
 get data block from rpc
     [Arguments]         ${blockHex}
-    dictionary for rpc call block       ${blockHex}
-    ${res}              REST.post       ${prodRPC}        {"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["0x${blockHex}",false ],"id" :1}
+    ${res}              REST.post       ${internalRPC}     {"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["0x${blockHex}",false ],"id" :1}
     set global variable  ${res}
-    ${statusCode}           get value from json         ${res}              $..status
-    ${statusCode}           get from list               ${statusCode}       0
+    ${timeRPC}          get value json and remove string   ${res}       $..seconds
+    set global variable     ${timeRPC}
+    ${statusCode}       get value from json                ${res}              $..status
+    ${statusCode}       get from list                      ${statusCode}       0
 	set global variable     ${statusCode}
     ${hashRPC}          get value json and remove string   ${res}       $..result.hash
     set global variable     ${hashRPC}
@@ -92,25 +78,48 @@ get data block from rpc
     ${txsRPC}           evaluate            ${txsRPC}/66
     set global variable     ${txsRPC}
 
+get count txs of block from es
+    [Arguments]         ${blockNum}
+    ${res}              REST.get     ${explorerProd}/txs?block=${blockNum}
+    set global variable  ${res}
+    ${statusCode}           get value from json         ${res}              $..status
+    ${statusCode}           get from list               ${statusCode}       0
+	set global variable     ${statusCode}
+    ${totalES}             get value json and remove string   ${res}       $..total
+    set global variable     ${totalES}
+
+get count txs of block from rpc
+    [Arguments]         ${blockHash}
+    ${res}              REST.post       {"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["${blockHash}"],"id" :1}
+    ${totalRPC}            get value json and remove string    ${res}      $..result
+    ${totalRPC}          convert hex to number       ${totalRPC}
+    set global variable     ${totalRPC}
+
 *** Test Cases ***
 compare data
-    ${fromNum}          set variable            8300000
-    FOR     ${i}    IN RANGE    10000
-        log to console      ${fromNum}
+    ${fromNum}          set variable            8658810
+    FOR     ${i}    IN RANGE    1000
         get data block from es      ${fromNum}
         IF  ${statusCode}==200
             get count txs of block from es  ${fromNum}
             IF  ${statusCode}==200
-                IF      ${total}!=${txs}
-                    log to console      /block & /txs?block=========================>>${fromNum}
-                END
                 ${hexNum}           convert number to hex   ${fromNum}
                 ${status}           run keyword and return status    get data block from rpc     ${hexNum}
                 IF      ${status}==True
-                    IF      ${hash}!=${hashRPC}
-                        log to console      /block & /rpc=========================>>${fromNum}
+                    IF      ${hashRPC}!=${hash}
+                        ${errorText}        Set Variable        Hash RPC != Hash PG: ${fromNum}
+                        log to console      ${errorText}
+                        push text to discord    ${channelID}    ${botToken}    ${errorText}
                     END
-                    ${fromNum}      evaluate        ${fromNum}+1
+                    IF      ${txsRPC}!=${totalES}
+                        ${errorText}        Set Variable        Txs RPC != Txs PG: ${fromNum}
+                        log to console      ${errorText}
+                        push text to discord    ${channelID}    ${botToken}    ${errorText}
+                    END
+                    log to console              ${fromNum}::${timeES}::${timeRPC}
+                    ${random}       Random Int      1       3
+                    ${fromNum}      evaluate        ${fromNum}+${random}
+                    Sleep           3s
                 END
             END
         END

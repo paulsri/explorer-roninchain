@@ -16,6 +16,7 @@
 - Collections
 - DatabaseLibrary: pip install robotframework-databaselibrary
 - psycopg2: pip install psycopg2-binary 
+- Fake data: pip install robotframework-faker
 
 ## 3. Ignore.robot: this file includes secret key
 - phrase: 12-word Secret Recovery Phrase to import wallet
