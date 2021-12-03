@@ -14,9 +14,9 @@ ${domain}                   https://explorer.roninchain.com
 ${timeout}                  10s
 ${retry}                    10
 ${sleep}                    5s
-${explorerStgV2}            https://staging.axieinfinity.co/explorer-test
+${explorer}                 https://explorer.roninchain.com/api
+#${explorer}                 https://staging.axieinfinity.co/explorer-test
 ${internalRPC}              https://api-internal.roninchain.com/rpc
-${explorerProd}             https://explorer.roninchain.com/api
 ${prodRPC}                  https://api.roninchain.com/rpc
 
 *** Keywords ***
@@ -62,14 +62,14 @@ get value json and remove string
 
 convert number to hex
     [Arguments]         ${number}
-    ${number}           convert to hex          ${number}
-    [Return]            ${number}
+    ${hex}              convert to hex          ${number}
+    [Return]            ${hex}
 
 convert hex to number
     [Arguments]         ${hex}
-    ${hex}              convert to integer      ${hex}
-    ${hex}              convert to string       ${hex}
-    [Return]            ${hex}
+    ${number}           convert to integer      ${hex}
+    ${number}           convert to string       ${number}
+    [Return]            ${number}
 
 connect postgres v2
     connect to database    psycopg2    axie    postgres    axie    127.0.0.1    dbPort=5432

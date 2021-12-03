@@ -5,12 +5,12 @@ Library         DebugLibrary
 Library         DatabaseLibrary
 Library         FakerLibrary
 Library         String
-Resource        ../RESOURCE/GlobalKey.robot
+Resource        C:/Users/tongh/PycharmProjects/explorer-roninchain/RESOURCE/GlobalKey.robot
 
 *** Keywords ***
 get data block from es
     [Arguments]         ${blockNum}
-    ${res}              REST.get     ${explorerStgV2}/block/${blockNum}
+    ${res}              REST.get     ${explorer}/block/${blockNum}
     set global variable  ${res}
     ${timeES}           get value json and remove string   ${res}       $..seconds
     set global variable     ${timeES}
@@ -42,7 +42,7 @@ get data block from es
 
 get data block from rpc
     [Arguments]         ${blockHex}
-    ${res}              REST.post       ${prodRPC}        {"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["0x${blockHex}",false ],"id" :1}
+    ${res}              REST.post       ${internalRPC}     {"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["0x${blockHex}",false ],"id" :1}
     set global variable  ${res}
     ${timeRPC}          get value json and remove string   ${res}       $..seconds
     set global variable     ${timeRPC}
@@ -79,48 +79,39 @@ get data block from rpc
     set global variable     ${txsRPC}
 
 get count txs of block from es
-    [Arguments]         ${blockNum}
-    ${res}              REST.get     ${explorerStgV2}/txs?block=${blockNum}
-    set global variable  ${res}
+    [Arguments]             ${blockNum}
+    ${res}                  REST.get     ${explorer}/txs?block=${blockNum}
+    set global variable     ${res}
     ${statusCode}           get value from json         ${res}              $..status
     ${statusCode}           get from list               ${statusCode}       0
 	set global variable     ${statusCode}
-    ${totalES}             get value json and remove string   ${res}       $..total
+    ${totalES}              get value json and remove string   ${res}       $..total
     set global variable     ${totalES}
 
-get count txs of block from rpc
-    [Arguments]         ${blockHash}
-    ${res}              REST.post       {"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["${blockHash}"],"id" :1}
-    ${totalRPC}            get value json and remove string    ${res}      $..result
-    ${totalRPC}          convert hex to number       ${totalRPC}
-    set global variable     ${totalRPC}
-
-*** Test Cases ***
-compare data
-    ${fromNum}          set variable            8657000
-    FOR     ${i}    IN RANGE    10000
-        get data block from es      ${fromNum}
-        IF  ${statusCode}==200
-            get count txs of block from es  ${fromNum}
-            IF  ${statusCode}==200
-                ${hexNum}           convert number to hex   ${fromNum}
-                ${status}           run keyword and return status    get data block from rpc     ${hexNum}
-                IF      ${status}==True
-                    IF      ${hashRPC}!=${hash}
-                        ${errorText}        Set Variable        Hash RPC != Hash PG: ${fromNum}
-                        log to console      ${errorText}
+#*** Test Cases ***
+#compare data
+#    ${fromNum}              Set Variable        8888888
+#    FOR     ${i}    IN RANGE    3
+#        get data block from es      ${fromNum}
+#        IF  ${statusCode}==200
+#            get count txs of block from es  ${fromNum}
+#            IF  ${statusCode}==200
+#                ${hexNum}           convert number to hex   ${fromNum}
+#                ${status}           run keyword and return status    get data block from rpc     ${hexNum}
+#                IF      ${status}==True
+#                    IF      ${hashRPC}!=${hash}
+#                        ${errorText}        Set Variable        **[ERROR]** Hash RPC (${hashRPC}) != Hash ES (${hash}): ${fromNum}
 #                        push text to discord    ${channelID}    ${botToken}    ${errorText}
-                    END
-                    IF      ${txsRPC}!=${totalES}
-                        ${errorText}        Set Variable        Txs RPC != Txs PG: ${fromNum}
-                        log to console      ${errorText}
+#                    END
+#                    IF      ${txsRPC}!=${totalES}
+#                        ${errorText}        Set Variable        **[ERROR]** Total txs RPC (${txsRPC}) != Total txs ES (${totalES}): ${fromNum}
 #                        push text to discord    ${channelID}    ${botToken}    ${errorText}
-                    END
-                    log to console              ${fromNum}::${timeES}::${timeRPC}
-                    ${random}       Random Int      1       3
-                    ${fromNum}      evaluate        ${fromNum}+${random}
-                    Sleep           1s
-                END
-            END
-        END
-    END
+#                    END
+#                    log to console              ${fromNum}::${timeES}::${timeRPC}
+#                    ${random}       Random Int      1       1
+#                    ${fromNum}      evaluate        ${fromNum}-${random}
+#                    Sleep           3s
+#                END
+#            END
+#        END
+#    END
