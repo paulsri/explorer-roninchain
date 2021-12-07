@@ -72,10 +72,10 @@ realtime checker
 
 *** Test Cases ***
 real time checker
-    FOR     ${i}    IN RANGE    10000
+    FOR     ${i}    IN RANGE    1
         Run Keyword And Continue On Failure     realtime checker
         Run Keyword And Continue On Failure     block checker           ${latestES}
         Run Keyword And Continue On Failure     token balance checker
         Run Keyword And Continue On Failure     txs and log checker     ${latestES}
-        Sleep    300s
+#        Sleep    300s
     END
