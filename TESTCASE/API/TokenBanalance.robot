@@ -1,12 +1,6 @@
 *** Settings ***
-Library         REST
-Library         JSONLibrary
-Library         DebugLibrary
-Library         DatabaseLibrary
-Library         FakerLibrary
-Library         String
-Library         Collections
-Resource        C:/Users/tongh/PycharmProjects/explorer-roninchain/RESOURCE/GlobalKey.robot
+Resource        ../../RESOURCE/Library.robot
+Resource        ../../RESOURCE/GlobalKey.robot
 
 *** Variables ***
 ${slp}          0xa8754b9fa15fc18bb59458815510e40a12cd2014
@@ -27,8 +21,13 @@ get ron balance from rpc
 get ron balance from es
     [Arguments]     ${address}
     ${res}          REST.get     ${explorer}/address/${address}
-    set global variable  ${res}
-    call api success
+    set global variable     ${res}
+    ${statusCode}           get value from json         ${res}              $..status
+    ${statusCode}           get from list               ${statusCode}       0
+	set global variable     ${statusCode}
+    ${statusCode}           get value from json         ${res}              $..status
+    ${statusCode}           get from list               ${statusCode}       0
+	set global variable     ${statusCode}
     ${ronBalanceES}             get value json and remove string      ${res}      $..balance
     ${ronBalanceES}             convert hex to number    ${ronBalanceES}
     [Return]                    ${ronBalanceES}
@@ -41,23 +40,29 @@ get token balance from rpc
     Set Global Variable   ${ethCall}
 
 get random address from es
-    ${res}          REST.get     ${explorer}/addresses/wealthiest?from=11&size=100
-    set global variable  ${res}
-    call api success
+    ${res}          REST.get     ${explorer}/addresses/wealthiest?from=11&size=21
+    set global variable     ${res}
+    ${statusCode}           get value from json         ${res}              $..status
+    ${statusCode}           get from list               ${statusCode}       0
+	set global variable     ${statusCode}
     ${listAddress}          Get Value From Json      ${res}      $..address
     [Return]                ${listAddress}
 
 get latest address change from es
-    ${res}          REST.get     ${explorer}/txs?size=11
-    set global variable  ${res}
-    call api success
-    ${listAddress}          Get Value From Json      ${res}      $..to
+    ${res}          REST.get     ${explorer}/tokentxs?size=100
+    set global variable     ${res}
+    ${statusCode}           get value from json         ${res}              $..status
+    ${statusCode}           get from list               ${statusCode}       0
+	set global variable     ${statusCode}
+    ${listAddress}          Get Value From Json      ${res}      $..from
     [Return]                ${listAddress}
 
 get address list
     ${res}          REST.get     ${explorer}/txs?size=1
-    set global variable  ${res}
-    call api success
+    set global variable     ${res}
+    ${statusCode}           get value from json         ${res}              $..status
+    ${statusCode}           get from list               ${statusCode}       0
+	set global variable     ${statusCode}
     ${randomAddress}         get value json and remove string    ${res}      $..from
     ${randomAddress}        Remove String    ${randomAddress}       0x
     [Return]                ${randomAddress}
@@ -79,67 +84,95 @@ get token balance by address from es
     ${balance}      convert hex to number    ${balance}
     [Return]        ${balance}
 
+get random address exclude whitelist
+    [Arguments]     ${list}
+    ${length}       Get Length      ${list}
+    ${length}       Evaluate        ${length}-1
+    FOR     ${i}    IN RANGE    ${length}
+        ${random}       Get From List       ${list}       ${length}
+        ${random}       Remove String       ${random}       0x
+        ${validate}     validate whitelist      ${random}
+        IF  ${validate}==True
+            ${length}   Evaluate    ${length}-1
+            Log To Console    ${length}::${random}
+        ELSE
+            Set Global Variable    ${random}
+            Log To Console    ${length}::${random}
+            Exit For Loop
+        END
+    END
+
+
+token balance checker
+    ${listAddress}          get latest address change from es
+    get random address exclude whitelist    ${listAddress}
+    ${status}       run keyword and return status    get ron balance from rpc       0x${random}
+    IF      ${status}==True
+        ${ronBalanceES}     get ron balance from es    0x${random}
+        IF  ${statusCode}==200
+            IF      ${ronBalanceRPC}!=${ronBalanceES}
+                push text to discord    ${channelID}    ${botToken}
+                ...                     :warning: RON balance wrong: 0x${random}. Should be equal ${ronBalanceRPC}
+            END
+        END
+    END
+    Sleep    1s
+    ${status}       run keyword and return status    get token balance from rpc        ${axs}      ${random}
+    IF      ${status}==True
+        ${esCall}    get token balance by address from es    0x${random}    ${axs}
+        IF  ${statusCode}==200
+            IF      ${ethCall}!=${esCall}
+                push text to discord    ${channelID}    ${botToken}
+                ...                     :warning: AXS balance wrong: 0x${random}. Should be equal ${ethCall}
+            END
+        END
+    END
+    Sleep    1s
+    ${status}       run keyword and return status    get token balance from rpc        ${slp}      ${random}
+    IF      ${status}==True
+        ${esCall}    get token balance by address from es    0x${random}    ${slp}
+        IF  ${statusCode}==200
+            IF      ${ethCall}!=${esCall}
+                push text to discord    ${channelID}    ${botToken}
+                ...                     :warning: SLP balance wrong: 0x${random}. Should be equal ${ethCall}
+            END
+        END
+    END
+    Sleep    1s
+    ${status}       run keyword and return status    get token balance from rpc        ${weth}      ${random}
+    IF      ${status}==True
+        ${esCall}    get token balance by address from es    0x${random}    ${weth}
+        IF  ${statusCode}==200
+            IF      ${ethCall}!=${esCall}
+                push text to discord    ${channelID}    ${botToken}
+                ...                     :warning: WETH balance wrong: 0x${random}. Should be equal ${ethCall}
+            END
+        END
+    END
+    Sleep    1s
+    ${status}       run keyword and return status    get token balance from rpc        ${usdc}   ${random}
+    IF      ${status}==True
+        ${esCall}    get token balance by address from es    0x${random}    ${usdc}
+        IF  ${statusCode}==200
+            IF      ${ethCall}!=${esCall}
+                push text to discord    ${channelID}    ${botToken}
+                ...                     :warning: USDC balance wrong: 0x${random}. Should be equal ${ethCall}
+            END
+        END
+    END
+    Sleep    1s
+    ${status}       run keyword and return status    get token balance from rpc        ${axie}   ${random}
+    IF      ${status}==True
+        ${esCall}    get token balance by address from es    0x${random}    ${axie}
+        IF  ${statusCode}==200
+            IF      ${ethCall}!=${esCall}
+                push text to discord    ${channelID}    ${botToken}
+                ...                     :warning: AXIE balance wrong: 0x${random}. Should be equal ${ethCall}
+            END
+        END
+    END
+
 #*** Test Cases ***
 #address v2 compare
 #    ${listAddress}          get latest address change from es
-#    ${randomIndex}          Set Variable            0
-#    FOR     ${i}    IN RANGE    2
-#        ${index}                Random Int          1       1
-#        ${randomIndex}          Evaluate            ${randomIndex}+${index}
-#        ${random}               Get From List       ${listAddress}       ${randomIndex}
-#        ${random}               Remove String       ${random}       0x
-#        Log To Console    ${randomIndex}::${random}
-#        ${status}       run keyword and return status    get ron balance from rpc       0x${random}
-#        IF      ${status}==True
-#            ${ronBalanceES}     get ron balance from es    0x${random}
-#            Log To Console      RON::${ronBalanceRPC} ====== ${ronBalanceES}
-#            IF      ${ronBalanceRPC}!=${ronBalanceES}
-#                push text to discord    ${channelID}    ${botToken}    **[ERROR]** RON balance wrong: 0x${random}. Should be equal ${ronBalanceRPC}
-#            END
-#        END
-#        Sleep    1s
-#        ${status}       run keyword and return status    get token balance from rpc        ${axs}      ${random}
-#        IF      ${status}==True
-#            ${esCall}    get token balance by address from es    0x${random}    ${axs}
-#            Log To Console      AXS::${ethCall} ====== ${esCall}
-#            IF      ${ethCall}!=${esCall}
-#                push text to discord    ${channelID}    ${botToken}    **[ERROR]** AXS balance wrong: 0x${random}. Should be equal ${ethCall}
-#            END
-#        END
-#        Sleep    1s
-#        ${status}       run keyword and return status    get token balance from rpc        ${slp}      ${random}
-#        IF      ${status}==True
-#            ${esCall}    get token balance by address from es    0x${random}    ${slp}
-#            Log To Console      SLP::${ethCall} ====== ${esCall}
-#            IF      ${ethCall}!=${esCall}
-#                push text to discord    ${channelID}    ${botToken}    **[ERROR]** SLP balance wrong: 0x${random}. Should be equal ${ethCall}
-#            END
-#        END
-#        Sleep    1s
-#        ${status}       run keyword and return status    get token balance from rpc        ${weth}      ${random}
-#        IF      ${status}==True
-#            ${esCall}    get token balance by address from es    0x${random}    ${weth}
-#            Log To Console      WETH::${ethCall} ====== ${esCall}
-#            IF      ${ethCall}!=${esCall}
-#                push text to discord    ${channelID}    ${botToken}    **[ERROR]** WETH balance wrong: 0x${random}. Should be equal ${ethCall}
-#            END
-#        END
-#        Sleep    1s
-#        ${status}       run keyword and return status    get token balance from rpc        ${usdc}   ${random}
-#        IF      ${status}==True
-#            ${esCall}    get token balance by address from es    0x${random}    ${usdc}
-#            Log To Console      USDC::${ethCall} ====== ${esCall}
-#            IF      ${ethCall}!=${esCall}
-#                push text to discord    ${channelID}    ${botToken}    **[ERROR]** USDC balance wrong: 0x${random}. Should be equal ${ethCall}
-#            END
-#        END
-#        Sleep    1s
-#        ${status}       run keyword and return status    get token balance from rpc        ${axie}   ${random}
-#        IF      ${status}==True
-#            ${esCall}    get token balance by address from es    0x${random}    ${axie}
-#            Log To Console      AXIE::${ethCall} ====== ${esCall}
-#            IF      ${ethCall}!=${esCall}
-#                push text to discord    ${channelID}    ${botToken}    **[ERROR]** AXIE balance wrong: 0x${random}. Should be equal ${ethCall}
-#            END
-#        END
-#    END
+#    get random address exclude whitelist    ${listAddress}

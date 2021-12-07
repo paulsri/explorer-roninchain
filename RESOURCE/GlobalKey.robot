@@ -1,11 +1,6 @@
 *** Settings ***
-Library             SeleniumLibrary
-Library             RequestsLibrary
-Library             REST
-Library             JSONLibrary
-Library             String
-Library             Collections
-Resource            ../RESOURCE/Report.robot
+Resource            Library.robot
+Resource            Report.robot
 Resource            ../Ignore.robot
 
 *** Variables ***
@@ -71,5 +66,20 @@ convert hex to number
     ${number}           convert to string       ${number}
     [Return]            ${number}
 
+convert hex to human number
+    [Arguments]         ${hex}
+    ${humanNumber}      Convert To Integer      ${hex}
+    ${humanNumber}      Evaluate                ${humanNumber}/1000000000000000000
+    ${humanNumber}      convert to string       ${humanNumber}
+    [Return]            ${humanNumber}
+
 connect postgres v2
     connect to database    psycopg2    axie    postgres    axie    127.0.0.1    dbPort=5432
+    
+validate whitelist
+    [Arguments]         ${address}
+    ${whitelist}        Get File                ${EXECDIR}/RESOURCE/WhiteList.json
+    ${whitelist}        convert to string       ${whitelist}
+	${whitelist}        remove string           ${whitelist}        [   "   ]   ,   \n
+    ${status}           Run Keyword And Return Status      Should Contain    ${whitelist}    ${address}
+    [Return]            ${status}

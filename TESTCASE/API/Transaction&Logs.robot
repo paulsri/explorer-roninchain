@@ -1,11 +1,6 @@
 *** Settings ***
-Library         REST
-Library         JSONLibrary
-Library         DebugLibrary
-Library         DatabaseLibrary
-Library         String
-Library         FakerLibrary
-Resource        C:/Users/tongh/PycharmProjects/explorer-roninchain/RESOURCE/GlobalKey.robot
+Resource        ../../RESOURCE/Library.robot
+Resource        ../../RESOURCE/GlobalKey.robot
 
 *** Keywords ***
 get txs from es by block
@@ -134,3 +129,34 @@ get from list & compare
     ${temp}             Convert To String    ${temp}
     ${compareWith}      Convert To String    ${compareWith}
     should be equal     ${temp}          ${compareWith}
+
+txs and log checker
+    [Arguments]         ${fromNum}
+    get txs from es by block        ${fromNum}
+    IF      ${statusCode}==200
+        FOR     ${i}        IN RANGE        ${length}
+            ${hash}         Get From List    ${hashList}    ${i}
+            ${status}       run keyword and return status   get txs from rpc by hash     ${hash}
+            Set Global Variable             ${i}
+            IF      ${status}==True
+                ${hashES}       Get From List           ${hashES}     ${i}
+                ${hashES}       Convert To String       ${hashES}
+                ${hashRPC}      Convert To String       ${hashRPC}
+                IF  ${hashES}!=${hashRPC}
+                    push text to discord    ${channelID}    ${botToken}
+                    ...                     :x: Transaction hash ES (${hashES}) != transaction hash RPC (${hashRPC})
+                END
+            END
+            ${status}       run keyword and return status   get log from rpc by hash        ${hash}
+            IF      ${status}==True
+                get log txs from es by hash  ${hash}
+                IF      ${statusCode}==200
+                    ${status}   run keyword and return status       Should Be Equal    ${dataES}    ${dataRPC}
+                    IF  ${status}!=True
+                        push text to discord    ${channelID}    ${botToken}
+                        ...                     :x: Log event ES != log event RPC (${hash})
+                    END
+                END
+            END
+        END
+    END

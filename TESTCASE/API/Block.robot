@@ -1,11 +1,6 @@
 *** Settings ***
-Library         REST
-Library         JSONLibrary
-Library         DebugLibrary
-Library         DatabaseLibrary
-Library         FakerLibrary
-Library         String
-Resource        C:/Users/tongh/PycharmProjects/explorer-roninchain/RESOURCE/GlobalKey.robot
+Resource        ../../RESOURCE/Library.robot
+Resource        ../../RESOURCE/GlobalKey.robot
 
 *** Keywords ***
 get data block from es
@@ -88,6 +83,31 @@ get count txs of block from es
     ${totalES}              get value json and remove string   ${res}       $..total
     set global variable     ${totalES}
 
+block checker
+    [Arguments]             ${latestES}
+    ${fromNum}              Evaluate       ${latestES}-10
+        Log To Console    BLOCK::${fromNum}
+        get data block from es      ${fromNum}
+        IF  ${statusCode}==200
+            get count txs of block from es  ${fromNum}
+            IF  ${statusCode}==200
+                ${hexNum}           convert number to hex   ${fromNum}
+                ${status}           run keyword and return status    get data block from rpc     ${hexNum}
+                IF      ${status}==True
+                    IF      ${hashRPC}!=${hash}
+                        push text to discord    ${channelID}    ${botToken}
+                        ...                     :x: Hash RPC (${hashRPC}) != Hash ES (${hash}): ${fromNum}
+                    END
+                    IF      ${txsRPC}!=${totalES}
+                        push text to discord    ${channelID}    ${botToken}
+                        ...                     :x: Total txs RPC (${txsRPC}) != Total txs ES (${totalES}): ${fromNum}
+                    END
+                    ${random}       Random Int      1       1
+                    ${fromNum}      evaluate        ${fromNum}-${random}
+                END
+            END
+        END
+
 #*** Test Cases ***
 #compare data
 #    ${fromNum}              Set Variable        8888888
@@ -100,11 +120,11 @@ get count txs of block from es
 #                ${status}           run keyword and return status    get data block from rpc     ${hexNum}
 #                IF      ${status}==True
 #                    IF      ${hashRPC}!=${hash}
-#                        ${errorText}        Set Variable        **[ERROR]** Hash RPC (${hashRPC}) != Hash ES (${hash}): ${fromNum}
+#                        ${errorText}        Set Variable        :x: Hash RPC (${hashRPC}) != Hash ES (${hash}): ${fromNum}
 #                        push text to discord    ${channelID}    ${botToken}    ${errorText}
 #                    END
 #                    IF      ${txsRPC}!=${totalES}
-#                        ${errorText}        Set Variable        **[ERROR]** Total txs RPC (${txsRPC}) != Total txs ES (${totalES}): ${fromNum}
+#                        ${errorText}        Set Variable        :x: Total txs RPC (${txsRPC}) != Total txs ES (${totalES}): ${fromNum}
 #                        push text to discord    ${channelID}    ${botToken}    ${errorText}
 #                    END
 #                    log to console              ${fromNum}::${timeES}::${timeRPC}

@@ -1,7 +1,7 @@
 *** Settings ***
-Resource        ../RESOURCE/Home.robot
-Resource        ../RESOURCE/GlobalKey.robot
-Library         SeleniumLibrary
+Resource        ../../RESOURCE/Home.robot
+Resource        ../../RESOURCE/GlobalKey.robot
+Resource        ../../RESOURCE/Library.robot
 
 *** Test Cases ***
 home page chrome

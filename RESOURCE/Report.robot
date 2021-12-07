@@ -1,14 +1,7 @@
 *** Settings ***
-Library		RequestsLibrary
-Library		REST
-Library     SeleniumLibrary
-Library     OperatingSystem
-Library     DebugLibrary
-Library     String
-Library     JSONLibrary
-Library     Collections
-Resource    ../Ignore.robot
-Resource    ../RESOURCE/GlobalKey.robot
+Resource        Library.robot
+Resource        GlobalKey.robot
+Resource        ../Ignore.robot
 
 *** Variables ***
 ${reportStatus}             //*[contains(@onClick,'totalDetailSelected()')]

@@ -1,9 +1,6 @@
 *** Settings ***
-Library         SeleniumLibrary
-Library         RequestsLibrary
-Library         DebugLibrary
-Library         JSONLibrary
-Resource        ../RESOURCE/GlobalKey.robot
+Resource        Library.robot
+Resource        GlobalKey.robot
 
 *** Variables ***
 ${homeUrl}              https://explorer.roninchain.com/
