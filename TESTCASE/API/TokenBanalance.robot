@@ -112,7 +112,7 @@ token balance checker
         IF  ${statusCode}==200
             IF      ${ronBalanceRPC}!=${ronBalanceES}
                 push text to discord    ${channelID}    ${botToken}
-                ...                     :warning: RON balance wrong: 0x${random}. Should be equal ${ronBalanceRPC}
+                ...                     :moneybag: RON balance wrong: 0x${random}. Should be equal ${ronBalanceRPC}
             END
         END
     END
@@ -123,7 +123,7 @@ token balance checker
         IF  ${statusCode}==200
             IF      ${ethCall}!=${esCall}
                 push text to discord    ${channelID}    ${botToken}
-                ...                     :warning: AXS balance wrong: 0x${random}. Should be equal ${ethCall}
+                ...                     :moneybag: AXS balance wrong: 0x${random}. Should be equal ${ethCall}
             END
         END
     END
@@ -134,7 +134,7 @@ token balance checker
         IF  ${statusCode}==200
             IF      ${ethCall}!=${esCall}
                 push text to discord    ${channelID}    ${botToken}
-                ...                     :warning: SLP balance wrong: 0x${random}. Should be equal ${ethCall}
+                ...                     :moneybag: SLP balance wrong: 0x${random}. Should be equal ${ethCall}
             END
         END
     END
@@ -145,7 +145,7 @@ token balance checker
         IF  ${statusCode}==200
             IF      ${ethCall}!=${esCall}
                 push text to discord    ${channelID}    ${botToken}
-                ...                     :warning: WETH balance wrong: 0x${random}. Should be equal ${ethCall}
+                ...                     :moneybag: WETH balance wrong: 0x${random}. Should be equal ${ethCall}
             END
         END
     END
@@ -156,7 +156,7 @@ token balance checker
         IF  ${statusCode}==200
             IF      ${ethCall}!=${esCall}
                 push text to discord    ${channelID}    ${botToken}
-                ...                     :warning: USDC balance wrong: 0x${random}. Should be equal ${ethCall}
+                ...                     :moneybag: USDC balance wrong: 0x${random}. Should be equal ${ethCall}
             END
         END
     END
@@ -167,7 +167,7 @@ token balance checker
         IF  ${statusCode}==200
             IF      ${ethCall}!=${esCall}
                 push text to discord    ${channelID}    ${botToken}
-                ...                     :warning: AXIE balance wrong: 0x${random}. Should be equal ${ethCall}
+                ...                     :moneybag: AXIE balance wrong: 0x${random}. Should be equal ${ethCall}
             END
         END
     END

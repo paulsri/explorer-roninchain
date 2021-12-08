@@ -144,7 +144,7 @@ txs and log checker
                 ${hashRPC}      Convert To String       ${hashRPC}
                 IF  ${hashES}!=${hashRPC}
                     push text to discord    ${channelID}    ${botToken}
-                    ...                     :x: Transaction hash ES (${hashES}) != transaction hash RPC (${hashRPC})
+                    ...                     :scroll: Transaction hash ES (${hashES}) != transaction hash RPC (${hashRPC})
                 END
             END
             ${status}       run keyword and return status   get log from rpc by hash        ${hash}
@@ -154,7 +154,7 @@ txs and log checker
                     ${status}   run keyword and return status       Should Be Equal    ${dataES}    ${dataRPC}
                     IF  ${status}!=True
                         push text to discord    ${channelID}    ${botToken}
-                        ...                     :x: Log event ES != log event RPC (${hash})
+                        ...                     :scroll: Log event ES != log event RPC (${hash})
                     END
                 END
             END

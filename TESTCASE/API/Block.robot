@@ -96,11 +96,11 @@ block checker
                 IF      ${status}==True
                     IF      ${hashRPC}!=${hash}
                         push text to discord    ${channelID}    ${botToken}
-                        ...                     :x: Hash RPC (${hashRPC}) != Hash ES (${hash}): ${fromNum}
+                        ...                     :package: Hash RPC (${hashRPC}) != Hash ES (${hash}): ${fromNum}
                     END
                     IF      ${txsRPC}!=${totalES}
                         push text to discord    ${channelID}    ${botToken}
-                        ...                     :x: Total txs RPC (${txsRPC}) != Total txs ES (${totalES}): ${fromNum}
+                        ...                     :package: Total txs RPC (${txsRPC}) != Total txs ES (${totalES}): ${fromNum}
                     END
                     ${random}       Random Int      1       1
                     ${fromNum}      evaluate        ${fromNum}-${random}

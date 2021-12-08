@@ -60,7 +60,7 @@ realtime checker
             ${diff}                 Evaluate    ${latestRPC}-${latestES}
             IF      ${diff}>10
                 push text to discord    ${channelID}    ${botToken}
-                ...                     :warning: Block ES (${latestES}) delay ${diff} blocks with RPC (${latestRPC})
+                ...                     :alarm_clock: Block ES (${latestES}) delay ${diff} blocks with RPC (${latestRPC})
             END
         ELSE
                 ${count500Error}    Evaluate    ${count500Error}+1
@@ -68,9 +68,9 @@ realtime checker
         ${latestTxs}            get latest txs from es
         IF  ${statusCode}==200
             ${diff}                 Evaluate    ${latestRPC}-${latestES}
-            IF      ${diff}>15
+            IF      ${diff}>10
                 push text to discord    ${channelID}    ${botToken}
-                ...                     :warning: Transaction ES (${latestTxs}) delay ${diff} blocks with RPC (${latestRPC})
+                ...                     :alarm_clock: Transaction ES (${latestTxs}) delay ${diff} blocks with RPC (${latestRPC})
             END
         ELSE
                 ${count500Error}    Evaluate    ${count500Error}+1
@@ -78,18 +78,18 @@ realtime checker
         ${latestTransfer}       get latest token transfer from es
         IF  ${statusCode}==200
             ${diff}                 Evaluate    ${latestRPC}-${latestTransfer}
-            IF      ${diff}>10
+            IF      ${diff}>15
                 push text to discord    ${channelID}    ${botToken}
-                ...                     :warning: Token transfer ES (${latestTransfer}) delay ${diff} blocks with RPC (${latestRPC})
+                ...                     :alarm_clock: Token transfer ES (${latestTransfer}) delay ${diff} blocks with RPC (${latestRPC})
             END
         ELSE
                 ${count500Error}    Evaluate    ${count500Error}+1
         END
     ELSE
-                push text to discord    ${channelID}    ${botToken}     :warning: Realtime checker: RPC api got 500 error
+                push text to discord    ${channelID}    ${botToken}     :alarm_clock: Realtime checker: RPC api got 500 error
     END
     IF      ${count500Error}>1
-        push text to discord    ${channelID}    ${botToken}     :warning: Realtime checker: ES api got 500 error ${count500Error}/3 times
+        push text to discord    ${channelID}    ${botToken}     :alarm_clock: Realtime checker: ES api got 500 error ${count500Error}/3 times
     END
 
 *** Test Cases ***
