@@ -1,52 +1,47 @@
 *** Settings ***
 Resource        ../../RESOURCE/Library.robot
 Resource        ../../RESOURCE/GlobalKey.robot
-Resource        ../../TESTCASE/API/Block.robot
-Resource        ../../TESTCASE/API/TokenBanalance.robot
-Resource        ../../TESTCASE/API/Transaction&Logs.robot
+#Resource        ../../TESTCASE/API/Block.robot
+#Resource        ../../TESTCASE/API/TokenBanalance.robot
+#Resource        ../../TESTCASE/API/Transaction.robot
 
 *** Keywords ***
 get latest block from rpc
-    ${res}                  REST.post       ${internalRPC}      {"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id" :1}
+    ${res}                  REST.post       ${internalRPC}      {"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id" :1}    loglevel=INFO        timeout=3
     ${latestRPC}            get value json and remove string    ${res}       $..result
     ${latestRPC}            convert hex to number               ${latestRPC}
     Set Global Variable     ${latestRPC}
 
 get status pg
-    ${res}                  REST.get     ${explorer}/status
-    set global variable     ${res}
-    ${statusCode}           get value from json         ${res}              $..status
-    ${statusCode}           get from list               ${statusCode}       0
+    ${res}                  REST.get     ${explorer}/status                 loglevel=INFO       timeout=3
+    get status code from res    ${res}
     ${latestBlockES}        get value json and remove string                ${res}              $..block
     ${latestTransactionES}  get value json and remove string                ${res}              $..transaction
     ${latestTransferES}     get value json and remove string                ${res}              $..transfer
     ${latestBalanceES}      get value json and remove string                ${res}              $..balance
 
 get latest block from es
-    ${res}                  REST.get     ${explorer}/blocks?size=1
-    set global variable     ${res}
-    ${statusCode}           get value from json         ${res}              $..status
-    ${statusCode}           get from list               ${statusCode}       0
-	set global variable     ${statusCode}
-    ${number}               get value json and remove string   ${res}       $..number
-    [Return]                ${number}
+    ${res}                  REST.get     ${explorer}/blocks?size=1          loglevel=INFO       timeout=3
+    get status code from res    ${res}
+    ${latestBlockES}        get value json and remove string   ${res}       $..number
+    Set Global Variable     ${latestBlockES}
+
+get latest block from pg
+    ${res}                  REST.get     ${explorer}/blocks/latest          loglevel=INFO       timeout=3
+    get status code from res    ${res}
+    ${latestBlockPG}        get value json and remove string   ${res}       $..number
+    Set Global Variable     ${latestBlockPG}
 
 get latest txs from es
-    ${res}                  REST.get     ${explorer}/txs?size=1
-    set global variable     ${res}
-    ${statusCode}           get value from json         ${res}              $..status
-    ${statusCode}           get from list               ${statusCode}       0
-	set global variable     ${statusCode}
+    ${res}                  REST.get     ${explorer}/txs?size=1             loglevel=INFO       timeout=3
+    get status code from res    ${res}
     ${number}               Get Value From Json    ${res}       $..results..block_number
     ${number}               Get From List    ${number}    0
     [Return]                ${number}
 
 get latest token transfer from es
-    ${res}                  REST.get     ${explorer}/tokentxs?size=1
-    set global variable     ${res}
-    ${statusCode}           get value from json         ${res}              $..status
-    ${statusCode}           get from list               ${statusCode}       0
-	set global variable     ${statusCode}
+    ${res}                  REST.get     ${explorer}/tokentxs?size=1        loglevel=INFO       timeout=3
+    get status code from res    ${res}
     ${number}               get value json and remove string   ${res}       $..results..block_number
     [Return]                ${number}
 
@@ -54,13 +49,12 @@ realtime checker
     ${status}               run keyword and return status    get latest block from rpc
     ${count500Error}        Set Variable        0
     IF      ${status}==True
-        ${latestES}             get latest block from es
-        Set Global Variable     ${latestES}
+        get latest block from es
         IF  ${statusCode}==200
-            ${diff}                 Evaluate    ${latestRPC}-${latestES}
+            ${diff}                 Evaluate    ${latestRPC}-${latestBlockES}
             IF      ${diff}>10
                 push text to discord    ${channelID}    ${botToken}
-                ...                     :alarm_clock: Block ES (${latestES}) delay ${diff} blocks with RPC (${latestRPC})
+                ...                     :alarm_clock: Block ES (${latestBlockES}) delay ${diff} blocks with RPC (${latestRPC})
             END
         ELSE
                 ${count500Error}    Evaluate    ${count500Error}+1
@@ -92,9 +86,26 @@ realtime checker
         push text to discord    ${channelID}    ${botToken}     :alarm_clock: Realtime checker: ES api got 500 error ${count500Error}/3 times
     END
 
-*** Test Cases ***
-real time checker
-    Run Keyword And Continue On Failure     realtime checker
-    Run Keyword And Continue On Failure     block checker           ${latestES}
-    Run Keyword And Continue On Failure     token balance checker
-    Run Keyword And Continue On Failure     txs and log checker     ${latestES}
+realtime block checker
+    FOR     ${i}    IN RANGE        100
+        ${status}               run keyword and return status    get latest block from rpc
+        IF      ${status}==True
+            ${status}               run keyword and return status    get latest block from es
+            IF  ${status}==True
+                IF  ${statusCode}==200
+                    ${status}               run keyword and return status    get latest block from pg
+                    IF      ${status}==True
+                        IF  ${statusCode}==200
+                            ${diff}                 Evaluate    ${latestRPC}-${latestBlockES}
+                            IF      ${diff}>2
+                                push text to discord    ${channelID}    ${botToken}
+                                ...                     :package: Block ES (${latestBlockES}) delay ${diff} blocks with RPC (${latestRPC}). Block PG = ${latestBlockPG}
+                            END
+                        Log To Console      ${latestRPC}::${latestBlockPG}::${latestBlockES}
+                        Exit For Loop
+                        END
+                    END
+                END
+            END
+        END
+    END

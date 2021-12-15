@@ -55,7 +55,7 @@ get latest address change from es
     ${statusCode}           get from list               ${statusCode}       0
 	set global variable     ${statusCode}
     ${listAddress}          Get Value From Json      ${res}      $..from
-    [Return]                ${listAddress}
+    Set Global Variable     ${listAddress}
 
 get address list
     ${res}          REST.get     ${explorer}/txs?size=1
@@ -104,75 +104,76 @@ get random address exclude whitelist
 
 
 token balance checker
-    ${listAddress}          get latest address change from es
-    get random address exclude whitelist    ${listAddress}
-    ${status}       run keyword and return status    get ron balance from rpc       0x${random}
-    IF      ${status}==True
-        ${ronBalanceES}     get ron balance from es    0x${random}
-        IF  ${statusCode}==200
-            IF      ${ronBalanceRPC}!=${ronBalanceES}
-                push text to discord    ${channelID}    ${botToken}
-                ...                     :moneybag: RON balance wrong: 0x${random}. Should be equal ${ronBalanceRPC}
+    ${status}       run api and make sure success          get latest address change from es
+    IF  ${status}==True
+        get random address exclude whitelist    ${listAddress}
+        ${status}       run keyword and return status    get ron balance from rpc       0x${random}
+        IF      ${status}==True
+            ${ronBalanceES}     get ron balance from es    0x${random}
+            IF  ${statusCode}==200
+                IF      ${ronBalanceRPC}!=${ronBalanceES}
+                    push text to discord    ${channelID}    ${botToken}
+                    ...                     :moneybag: RON balance wrong: 0x${random}. Should be equal ${ronBalanceRPC}
+                END
             END
         END
-    END
-    Sleep    1s
-    ${status}       run keyword and return status    get token balance from rpc        ${axs}      ${random}
-    IF      ${status}==True
-        ${esCall}    get token balance by address from es    0x${random}    ${axs}
-        IF  ${statusCode}==200
-            IF      ${ethCall}!=${esCall}
-                push text to discord    ${channelID}    ${botToken}
-                ...                     :moneybag: AXS balance wrong: 0x${random}. Should be equal ${ethCall}
+        Sleep    1s
+        ${status}       run keyword and return status    get token balance from rpc        ${axs}      ${random}
+        IF      ${status}==True
+            ${esCall}    get token balance by address from es    0x${random}    ${axs}
+            IF  ${statusCode}==200
+                IF      ${ethCall}!=${esCall}
+                    push text to discord    ${channelID}    ${botToken}
+                    ...                     :moneybag: AXS balance wrong: 0x${random}. Should be equal ${ethCall}
+                END
             END
         END
-    END
-    Sleep    1s
-    ${status}       run keyword and return status    get token balance from rpc        ${slp}      ${random}
-    IF      ${status}==True
-        ${esCall}    get token balance by address from es    0x${random}    ${slp}
-        IF  ${statusCode}==200
-            IF      ${ethCall}!=${esCall}
-                push text to discord    ${channelID}    ${botToken}
-                ...                     :moneybag: SLP balance wrong: 0x${random}. Should be equal ${ethCall}
+        Sleep    1s
+        ${status}       run keyword and return status    get token balance from rpc        ${slp}      ${random}
+        IF      ${status}==True
+            ${esCall}    get token balance by address from es    0x${random}    ${slp}
+            IF  ${statusCode}==200
+                IF      ${ethCall}!=${esCall}
+                    push text to discord    ${channelID}    ${botToken}
+                    ...                     :moneybag: SLP balance wrong: 0x${random}. Should be equal ${ethCall}
+                END
             END
         END
-    END
-    Sleep    1s
-    ${status}       run keyword and return status    get token balance from rpc        ${weth}      ${random}
-    IF      ${status}==True
-        ${esCall}    get token balance by address from es    0x${random}    ${weth}
-        IF  ${statusCode}==200
-            IF      ${ethCall}!=${esCall}
-                push text to discord    ${channelID}    ${botToken}
-                ...                     :moneybag: WETH balance wrong: 0x${random}. Should be equal ${ethCall}
+        Sleep    1s
+        ${status}       run keyword and return status    get token balance from rpc        ${weth}      ${random}
+        IF      ${status}==True
+            ${esCall}    get token balance by address from es    0x${random}    ${weth}
+            IF  ${statusCode}==200
+                IF      ${ethCall}!=${esCall}
+                    push text to discord    ${channelID}    ${botToken}
+                    ...                     :moneybag: WETH balance wrong: 0x${random}. Should be equal ${ethCall}
+                END
             END
         END
-    END
-    Sleep    1s
-    ${status}       run keyword and return status    get token balance from rpc        ${usdc}   ${random}
-    IF      ${status}==True
-        ${esCall}    get token balance by address from es    0x${random}    ${usdc}
-        IF  ${statusCode}==200
-            IF      ${ethCall}!=${esCall}
-                push text to discord    ${channelID}    ${botToken}
-                ...                     :moneybag: USDC balance wrong: 0x${random}. Should be equal ${ethCall}
+        Sleep    1s
+        ${status}       run keyword and return status    get token balance from rpc        ${usdc}   ${random}
+        IF      ${status}==True
+            ${esCall}    get token balance by address from es    0x${random}    ${usdc}
+            IF  ${statusCode}==200
+                IF      ${ethCall}!=${esCall}
+                    push text to discord    ${channelID}    ${botToken}
+                    ...                     :moneybag: USDC balance wrong: 0x${random}. Should be equal ${ethCall}
+                END
             END
         END
-    END
-    Sleep    1s
-    ${status}       run keyword and return status    get token balance from rpc        ${axie}   ${random}
-    IF      ${status}==True
-        ${esCall}    get token balance by address from es    0x${random}    ${axie}
-        IF  ${statusCode}==200
-            IF      ${ethCall}!=${esCall}
-                push text to discord    ${channelID}    ${botToken}
-                ...                     :moneybag: AXIE balance wrong: 0x${random}. Should be equal ${ethCall}
+        Sleep    1s
+        ${status}       run keyword and return status    get token balance from rpc        ${axie}   ${random}
+        IF      ${status}==True
+            ${esCall}    get token balance by address from es    0x${random}    ${axie}
+            IF  ${statusCode}==200
+                IF      ${ethCall}!=${esCall}
+                    push text to discord    ${channelID}    ${botToken}
+                    ...                     :moneybag: AXIE balance wrong: 0x${random}. Should be equal ${ethCall}
+                END
             END
         END
     END
 
-#*** Test Cases ***
-#address v2 compare
-#    ${listAddress}          get latest address change from es
-#    get random address exclude whitelist    ${listAddress}
+*** Test Cases ***
+address v2 compare
+    token balance checker

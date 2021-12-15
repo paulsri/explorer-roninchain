@@ -5,7 +5,7 @@ Resource        ../../RESOURCE/GlobalKey.robot
 *** Keywords ***
 get data block from es
     [Arguments]         ${blockNum}
-    ${res}              REST.get     ${explorer}/block/${blockNum}
+    ${res}              REST.get     ${explorer}/block/${blockNum}      loglevel=INFO       timeout=2.5
     set global variable  ${res}
     ${timeES}           get value json and remove string   ${res}       $..seconds
     set global variable     ${timeES}
@@ -37,7 +37,8 @@ get data block from es
 
 get data block from rpc
     [Arguments]         ${blockHex}
-    ${res}              REST.post       ${internalRPC}     {"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["0x${blockHex}",false ],"id" :1}
+    ${res}              REST.post       ${internalRPC}
+    ...                 {"jsonrpc":"2.0","method":"eth_getBlockByNumber","params":["0x${blockHex}",false ],"id" :1}     loglevel=INFO       timeout=2.5
     set global variable  ${res}
     ${timeRPC}          get value json and remove string   ${res}       $..seconds
     set global variable     ${timeRPC}
@@ -75,7 +76,7 @@ get data block from rpc
 
 get count txs of block from es
     [Arguments]             ${blockNum}
-    ${res}                  REST.get     ${explorer}/txs?block=${blockNum}
+    ${res}                  REST.get     ${explorer}/txs?block=${blockNum}      loglevel=INFO       timeout=2.5
     set global variable     ${res}
     ${statusCode}           get value from json         ${res}              $..status
     ${statusCode}           get from list               ${statusCode}       0
@@ -84,54 +85,37 @@ get count txs of block from es
     set global variable     ${totalES}
 
 block checker
-    [Arguments]             ${latestES}
-    ${fromNum}              Evaluate       ${latestES}-10
-        Log To Console    BLOCK::${fromNum}
-        get data block from es      ${fromNum}
-        IF  ${statusCode}==200
-            get count txs of block from es  ${fromNum}
-            IF  ${statusCode}==200
-                ${hexNum}           convert number to hex   ${fromNum}
-                ${status}           run keyword and return status    get data block from rpc     ${hexNum}
-                IF      ${status}==True
-                    IF      ${hashRPC}!=${hash}
-                        push text to discord    ${channelID}    ${botToken}
-                        ...                     :package: Hash RPC (${hashRPC}) != Hash ES (${hash}): ${fromNum}
+    ${status}           run keyword and return status       get data block from es      ${fromNum}
+    IF  ${status}==True
+        IF      ${statusCode}==200
+            ${status}           run keyword and return status       get count txs of block from es  ${fromNum}
+            IF  ${status}==True
+                IF  ${statusCode}==200
+                    ${hexNum}           convert number to hex   ${fromNum}
+                    ${status}           run keyword and return status    get data block from rpc     ${hexNum}
+                    IF      ${status}==True
+                        Log To Console          ${fromNum}::${txsRPC}==${totalES}?
+                        ${ran}              Random Int  3     11
+                        ${fromNum}          Evaluate    ${fromNum}-${ran}
+                        Set Global Variable     ${fromNum}
+                        IF      ${hashRPC}!=${hash}
+                            push text to discord    ${channelID}    ${botToken}
+                            ...                     :package: Hash RPC (${hashRPC}) != Hash ES (${hash}): ${fromNum}
+                        END
+                        IF      ${txsRPC}!=${totalES}
+                            push text to discord    ${channelID}    ${botToken}
+                            ...                     :package: Total txs RPC (${txsRPC}) != Total txs ES (${totalES}): ${fromNum}
+                        END
                     END
-                    IF      ${txsRPC}!=${totalES}
-                        push text to discord    ${channelID}    ${botToken}
-                        ...                     :package: Total txs RPC (${txsRPC}) != Total txs ES (${totalES}): ${fromNum}
-                    END
-                    ${random}       Random Int      1       1
-                    ${fromNum}      evaluate        ${fromNum}-${random}
                 END
             END
         END
+    END
 
-#*** Test Cases ***
-#compare data
-#    ${fromNum}              Set Variable        8888888
-#    FOR     ${i}    IN RANGE    3
-#        get data block from es      ${fromNum}
-#        IF  ${statusCode}==200
-#            get count txs of block from es  ${fromNum}
-#            IF  ${statusCode}==200
-#                ${hexNum}           convert number to hex   ${fromNum}
-#                ${status}           run keyword and return status    get data block from rpc     ${hexNum}
-#                IF      ${status}==True
-#                    IF      ${hashRPC}!=${hash}
-#                        ${errorText}        Set Variable        :x: Hash RPC (${hashRPC}) != Hash ES (${hash}): ${fromNum}
-#                        push text to discord    ${channelID}    ${botToken}    ${errorText}
-#                    END
-#                    IF      ${txsRPC}!=${totalES}
-#                        ${errorText}        Set Variable        :x: Total txs RPC (${txsRPC}) != Total txs ES (${totalES}): ${fromNum}
-#                        push text to discord    ${channelID}    ${botToken}    ${errorText}
-#                    END
-#                    log to console              ${fromNum}::${timeES}::${timeRPC}
-#                    ${random}       Random Int      1       1
-#                    ${fromNum}      evaluate        ${fromNum}-${random}
-#                    Sleep           3s
-#                END
-#            END
-#        END
-#    END
+*** Test Cases ***
+quick test
+    ${fromNum}      Set Variable        9120281
+    Set Global Variable    ${fromNum}
+    FOR     ${i}        IN RANGE    100000
+        block checker
+    END

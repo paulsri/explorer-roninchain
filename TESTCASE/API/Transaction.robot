@@ -5,7 +5,7 @@ Resource        ../../RESOURCE/GlobalKey.robot
 *** Keywords ***
 get txs from es by block
     [Arguments]         ${blockNum}
-    ${res}              REST.get     ${explorer}/txs?block=${blockNum}&size=1
+    ${res}              REST.get     ${explorer}/txs?block=${blockNum}&size=1     loglevel=INFO     timeout=3
     set global variable  ${res}
     call api success
     ${statusCode}           get value from json         ${res}              $..status
@@ -49,8 +49,7 @@ get txs from es by block
 
 get log txs from es by hash
     [Arguments]         ${hash}
-    ${res}              REST.get     ${explorer}/tx/${hash}
-    set global variable  ${res}
+    ${res}              REST.get     ${explorer}/tx/${hash}     loglevel=INFO
     set global variable     ${res}
     ${statusCode}           get value from json         ${res}              $..status
     ${statusCode}           get from list               ${statusCode}       0
@@ -66,7 +65,7 @@ get log txs from es by hash
 
 get txs from rpc by hash
     [Arguments]         ${hash}
-    ${res}              REST.post     ${internalRPC}        {"jsonrpc":"2.0","method":"eth_getTransactionByHash","params":["${hash}"],"id" :1}
+    ${res}              REST.post     ${internalRPC}        {"jsonrpc":"2.0","method":"eth_getTransactionByHash","params":["${hash}"],"id" :1}     timeout=3
     set global variable  ${res}
     call api success
     ${timeRPC}          get value json and remove string   ${res}       $..seconds
@@ -99,7 +98,7 @@ get txs from rpc by hash
 
 get log from rpc by hash
     [Arguments]         ${hash}
-    ${res}              REST.post     ${internalRPC}        {"jsonrpc":"2.0","method":"eth_getTransactionReceipt","params":["${hash}"],"id" :1}
+    ${res}              REST.post     ${internalRPC}        {"jsonrpc":"2.0","method":"eth_getTransactionReceipt","params":["${hash}"],"id" :1}     timeout=3
     set global variable  ${res}
     call api success
     ${timeRPC}          get value json and remove string   ${res}           $..seconds
@@ -132,31 +131,49 @@ get from list & compare
 
 txs and log checker
     [Arguments]         ${fromNum}
-    get txs from es by block        ${fromNum}
-    IF      ${statusCode}==200
-        FOR     ${i}        IN RANGE        ${length}
-            ${hash}         Get From List    ${hashList}    ${i}
-            ${status}       run keyword and return status   get txs from rpc by hash     ${hash}
-            Set Global Variable             ${i}
-            IF      ${status}==True
-                ${hashES}       Get From List           ${hashES}     ${i}
-                ${hashES}       Convert To String       ${hashES}
-                ${hashRPC}      Convert To String       ${hashRPC}
-                IF  ${hashES}!=${hashRPC}
-                    push text to discord    ${channelID}    ${botToken}
-                    ...                     :scroll: Transaction hash ES (${hashES}) != transaction hash RPC (${hashRPC})
-                END
-            END
-            ${status}       run keyword and return status   get log from rpc by hash        ${hash}
-            IF      ${status}==True
-                get log txs from es by hash  ${hash}
-                IF      ${statusCode}==200
-                    ${status}   run keyword and return status       Should Be Equal    ${dataES}    ${dataRPC}
-                    IF  ${status}!=True
+    ${status}       run keyword and return status   get txs from es by block        ${fromNum}
+    IF        ${status}==True
+        IF      ${statusCode}==200
+            FOR     ${i}        IN RANGE        ${length}
+                ${hash}         Get From List    ${hashList}    ${i}
+                ${status}       run keyword and return status   get txs from rpc by hash     ${hash}
+                Set Global Variable             ${i}
+                IF      ${status}==True
+                    ${hashES}       Get From List           ${hashES}     ${i}
+                    ${hashES}       Convert To String       ${hashES}
+                    Set Global Variable    ${hashES}
+                    ${hashRPC}      Convert To String       ${hashRPC}
+                    Set Global Variable    ${hashRPC}
+                    IF  ${hashES}!=${hashRPC}
                         push text to discord    ${channelID}    ${botToken}
-                        ...                     :scroll: Log event ES != log event RPC (${hash})
+                        ...                     :scroll: Transaction hash ES (${hashES}) != transaction hash RPC (${hashRPC})
+                    END
+                    ${status}       run keyword and return status   get log from rpc by hash        ${hash}
+                    IF      ${status}==True
+                        ${status}       run keyword and return status   get log txs from es by hash  ${hash}
+                        IF      ${status}==True
+                            IF      ${statusCode}==200
+                                ${verify}   run keyword and return status       Should Be Equal    ${dataES}    ${dataRPC}
+                                IF  ${verify}!=True
+                                    push text to discord    ${channelID}    ${botToken}
+                                    ...                     :scroll: ${fromNum}: Log event PG != log event RPC (${hash})
+                                END
+                                Log To Console          ${fromNum}::${hashES}==${hashRPC}?
+#                                ${ran}              Random Int  1     1
+                                ${fromNum}          Evaluate    ${fromNum}-7777
+                                Set Global Variable     ${fromNum}
+                            END
+                        END
                     END
                 END
             END
         END
+    END
+
+*** Test Cases ***
+quick test
+    ${fromNum}      Set Variable        9298523
+    Set Global Variable    ${fromNum}
+    FOR     ${i}        IN RANGE    10000
+        txs and log checker     ${fromNum}
     END
