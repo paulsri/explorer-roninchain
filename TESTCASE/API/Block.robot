@@ -95,7 +95,7 @@ block checker
                     ${status}           run keyword and return status    get data block from rpc     ${hexNum}
                     IF      ${status}==True
                         Log To Console          ${fromNum}::${txsRPC}==${totalES}?
-                        ${ran}              Random Int  3     11
+                        ${ran}              Random Int  333     777
                         ${fromNum}          Evaluate    ${fromNum}-${ran}
                         Set Global Variable     ${fromNum}
                         IF      ${hashRPC}!=${hash}
@@ -114,8 +114,8 @@ block checker
 
 *** Test Cases ***
 quick test
-    ${fromNum}      Set Variable        9120281
+    ${fromNum}      Set Variable        9318125
     Set Global Variable    ${fromNum}
-    FOR     ${i}        IN RANGE    100000
+    FOR     ${i}        IN RANGE    10000
         block checker
     END

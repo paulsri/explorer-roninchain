@@ -159,8 +159,8 @@ txs and log checker
                                     ...                     :scroll: ${fromNum}: Log event PG != log event RPC (${hash})
                                 END
                                 Log To Console          ${fromNum}::${hashES}==${hashRPC}?
-#                                ${ran}              Random Int  1     1
-                                ${fromNum}          Evaluate    ${fromNum}-7777
+                                ${ran}              Random Int  333     999
+                                ${fromNum}          Evaluate    ${fromNum}-${ran}
                                 Set Global Variable     ${fromNum}
                             END
                         END
@@ -172,7 +172,7 @@ txs and log checker
 
 *** Test Cases ***
 quick test
-    ${fromNum}      Set Variable        9298523
+    ${fromNum}      Set Variable        9318125
     Set Global Variable    ${fromNum}
     FOR     ${i}        IN RANGE    10000
         txs and log checker     ${fromNum}

@@ -1,7 +1,7 @@
 *** Settings ***
 Library         SeleniumLibrary
 Library         RequestsLibrary
-Library         REST
+Library         REST        ssl_verify=false
 Library         JSONLibrary
 Library         DebugLibrary
 Library         DatabaseLibrary

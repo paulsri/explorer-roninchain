@@ -8,3 +8,6 @@ Ignore.robot
 .idea
 pabot_results
 .pabotsuitenames
+AddrList1.json
+AddrList2.json
+Holder.robot

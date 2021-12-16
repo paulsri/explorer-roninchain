@@ -2,6 +2,7 @@
 Resource            Library.robot
 Resource            Report.robot
 Resource            ../Ignore.robot
+Library    DateTime
 
 *** Variables ***
 ${domain}                   https://explorer.roninchain.com
@@ -9,7 +10,7 @@ ${domain}                   https://explorer.roninchain.com
 ${timeout}                  10s
 ${retry}                    10
 ${sleep}                    5s
-${explorer}                 https://explorer.roninchain.com/api-v2
+${explorer}                 https://explorer-apiv2.roninchain.com
 #${explorer}                 https://explorer.roninchain.com/api
 #${explorer}                 https://staging.axieinfinity.co/explorer-test
 ${internalRPC}              https://api-internal.roninchain.com/rpc
@@ -113,6 +114,8 @@ run api and make sure success
     IF  ${status}==True
         IF  ${statusCode}==200
             ${result}   Set Variable    True
+        ELSE
+        ${result}   Set Variable    False
         END
     ELSE
         ${result}   Set Variable    False
