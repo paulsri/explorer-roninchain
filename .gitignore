@@ -1,4 +1,8 @@
+pabot_results
+.pabotsuitenames
 Ignore.robot
+Health.bat
+Scheduler.bat
 *.png
 *.html
 *.xml
@@ -6,8 +10,3 @@ Ignore.robot
 *.jpg
 *.log
 .idea
-pabot_results
-.pabotsuitenames
-AddrList1.json
-AddrList2.json
-Holder.robot

@@ -31,7 +31,7 @@ get latest token transfer from es
 get token balance from es
     ${changeCount}          Set Variable        0
     ${latestBalBefore}      Load JSON From File     ${EXECDIR}/RESOURCE/WhaleBalance.json
-    ${res}                  REST.get     ${explorer}/tokenbalances/0xb32e9a84ae0b55b8ab715e4ac793a61b277bafa3        loglevel=INFO       timeout=10
+    ${res}                  REST.get     ${explorer}/tokenbalances/0x306a28279d04a47468ed83d55088d0dcd1369294        loglevel=INFO       timeout=10
     ${tokenAddr}            Get Value From Json    ${res}    $..results..token_address
     ${length}               Get Length    ${tokenAddr}
     FOR         ${i}        IN RANGE    ${length}
@@ -49,9 +49,18 @@ get token balance from es
     Create File             ${EXECDIR}/RESOURCE/WhaleBalance.json   ${latestBalBefore}  UTF-8
     Set Global Variable     ${changeCount}
 
+get stats from redis
+    ${res}                  REST.get     ${explorer}/txs/stats        loglevel=INFO       timeout=3
+    get status code from res    ${res}
+    ${date}                 Get Current Date        result_format=%Y-%m-%d
+    ${body}                 Get Value From Json     ${res}      $.body
+    ${body}                 Convert To String       ${body}
+    ${verifyRedis}          Run Keyword And Return Status    Should Contain     ${body}     ${date}
+    Set Global Variable     ${verifyRedis}
+
 realtime checker
     ${status}               run keyword and return status    get latest block from rpc
-    ${diffError}            Set Variable    3
+    ${diffError}            Set Variable        5
     ${count500Error}        Set Variable        0
     IF      ${status}==True
         ${status}           run api and make sure success    get latest block from es
@@ -69,7 +78,7 @@ realtime checker
             ${diff}                 Evaluate    ${latestRPC}-${latestTxsES}
             IF      ${diff}>${diffError}
                 push text to discord    ${channelID}    ${botToken}
-                ...                     ::scroll: Transaction ES (${latestTxsES}) delay ${diff} blocks with RPC (${latestRPC})
+                ...                     :scroll: Transaction ES (${latestTxsES}) delay ${diff} blocks with RPC (${latestRPC})
             END
         ELSE
                 ${count500Error}    Evaluate    ${count500Error}+1
@@ -88,14 +97,24 @@ realtime checker
         IF  ${status}==True
             IF  ${changeCount}<1
                 push text to discord    ${channelID}    ${botToken}
-                ...                     :moneybag: Token balance ES don't update: 0xb32e9a84ae0b55b8ab715e4ac793a61b277bafa3
+                ...                     :moneybag: Token balance ES donot update
             END
         ELSE
                 ${count500Error}    Evaluate    ${count500Error}+1
         END
+        ${status}       run api and make sure success          get stats from redis
+        IF  ${status}==True
+            IF  ${verifyRedis}!=True
+                    push text to discord    ${channelID}    ${botToken}
+                    ...                     :x: Something wrong with redis, please check.
+            END
+        ELSE
+            push text to discord    ${channelID}    ${botToken}
+                    ...                     :x: Cannot call redis, please check https://explorer.roninchain.com/api/txs/stats.
+        END
     END
     IF      ${count500Error}>1
-        push text to discord    ${channelID}    ${botToken}     :alarm_clock: Realtime checker: ES api got exception ${count500Error}/3 times
+        push text to discord    ${channelID}    ${botToken}     :alarm_clock: Realtime checker: ES api got exception ${count500Error}/4 times
     END
 
 *** Test Cases ***

@@ -10,8 +10,8 @@ ${domain}                   https://explorer.roninchain.com
 ${timeout}                  10s
 ${retry}                    10
 ${sleep}                    5s
-${explorer}                 https://explorer-apiv2.roninchain.com
-#${explorer}                 https://explorer.roninchain.com/api
+#${explorer}                 https://explorer-apiv2.roninchain.com
+${explorer}                 https://explorer.roninchain.com/api
 #${explorer}                 https://staging.axieinfinity.co/explorer-test
 ${internalRPC}              https://api-internal.roninchain.com/rpc
 ${prodRPC}                  https://api.roninchain.com/rpc

@@ -1,3 +1,3 @@
-cd C:\Users\Admin\PycharmProjects\explorer-roninchain
-robot C:\Users\tongh\PycharmProjects\explorer-roninchain\HealthCheck.robot
+cd C:\Users\Administrator\PycharmProjects\explorer-roninchain
+robot C:\Users\Administrator\PycharmProjects\explorer-roninchain\HealthCheck.robot
 exit

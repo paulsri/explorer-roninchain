@@ -95,8 +95,8 @@ block checker
                     ${status}           run keyword and return status    get data block from rpc     ${hexNum}
                     IF      ${status}==True
                         Log To Console          ${fromNum}::${txsRPC}==${totalES}?
-                        ${ran}              Random Int  333     777
-                        ${fromNum}          Evaluate    ${fromNum}-${ran}
+                        ${ran}              Random Int  1     1
+                        ${fromNum}          Evaluate    ${fromNum}+${ran}
                         Set Global Variable     ${fromNum}
                         IF      ${hashRPC}!=${hash}
                             push text to discord    ${channelID}    ${botToken}
@@ -114,7 +114,7 @@ block checker
 
 *** Test Cases ***
 quick test
-    ${fromNum}      Set Variable        9318125
+    ${fromNum}      Set Variable        9549700
     Set Global Variable    ${fromNum}
     FOR     ${i}        IN RANGE    10000
         block checker

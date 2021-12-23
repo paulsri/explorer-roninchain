@@ -12,7 +12,7 @@ get balance balance from rpc
 
 *** Test Cases ***
 quick count holder
-    ${addrList}     Load JSON From File    C:/Users/tongh/PycharmProjects/explorer-roninchain/TESTCASE/API/AddrList1.json
+    ${addrList}     Load JSON From File    ${filePath}
     ${index}        Set Variable        0
     ${count}        Set Variable        0
     FOR    ${i}     IN RANGE    300
