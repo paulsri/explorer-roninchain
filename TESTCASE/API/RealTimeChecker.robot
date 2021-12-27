@@ -60,7 +60,7 @@ get stats from redis
 
 realtime checker
     ${status}               run keyword and return status    get latest block from rpc
-    ${diffError}            Set Variable        5
+    ${diffError}            Set Variable        0
     ${count500Error}        Set Variable        0
     IF      ${status}==True
         ${status}           run api and make sure success    get latest block from es
@@ -68,7 +68,7 @@ realtime checker
             ${diff}                 Evaluate    ${latestRPC}-${latestBlockES}
             IF      ${diff}>${diffError}
                 push text to discord    ${channelID}    ${botToken}
-                ...                     :package: Block (${latestBlockES}) delay ${diff} blocks with RPC (${latestRPC})
+                ...                     :package: Block (${latestBlockES}) delay **${diff}** blocks with RPC (${latestRPC})
             END
         ELSE
                 ${count500Error}    Evaluate    ${count500Error}+1
@@ -78,7 +78,7 @@ realtime checker
             ${diff}                 Evaluate    ${latestRPC}-${latestTxsES}
             IF      ${diff}>${diffError}
                 push text to discord    ${channelID}    ${botToken}
-                ...                     :scroll: Transaction (${latestTxsES}) delay ${diff} blocks with RPC (${latestRPC})
+                ...                     :scroll: Transaction (${latestTxsES}) delay **${diff}** blocks with RPC (${latestRPC})
             END
         ELSE
                 ${count500Error}    Evaluate    ${count500Error}+1
@@ -88,7 +88,7 @@ realtime checker
             ${diff}                 Evaluate    ${latestRPC}-${latestTransferES}
             IF      ${diff}>${diffError}
                 push text to discord    ${channelID}    ${botToken}
-                ...                     :notepad_spiral: Token transfer (${latestTransferES}) delay ${diff} blocks with RPC (${latestRPC})
+                ...                     :notepad_spiral: Token transfer (${latestTransferES}) delay **${diff}** blocks with RPC (${latestRPC})
             END
         ELSE
                 ${count500Error}    Evaluate    ${count500Error}+1
