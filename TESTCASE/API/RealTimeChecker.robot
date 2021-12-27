@@ -52,7 +52,7 @@ get token balance from es
 get stats from redis
     ${res}                  REST.get     ${explorer}/txs/stats        loglevel=INFO       timeout=3
     get status code from res    ${res}
-    ${date}                 Get Current Date        result_format=%Y-%m-%d
+    ${date}                 Get Current Date        result_format=%Y-%m-%d      time_zone=UTC
     ${body}                 Get Value From Json     ${res}      $.body
     ${body}                 Convert To String       ${body}
     ${verifyRedis}          Run Keyword And Return Status    Should Contain     ${body}     ${date}
