@@ -68,7 +68,7 @@ realtime checker
             ${diff}                 Evaluate    ${latestRPC}-${latestBlockES}
             IF      ${diff}>${diffError}
                 push text to discord    ${channelID}    ${botToken}
-                ...                     :package: Block ES (${latestBlockES}) delay ${diff} blocks with RPC (${latestRPC})
+                ...                     :package: Block (${latestBlockES}) delay ${diff} blocks with RPC (${latestRPC})
             END
         ELSE
                 ${count500Error}    Evaluate    ${count500Error}+1
@@ -78,7 +78,7 @@ realtime checker
             ${diff}                 Evaluate    ${latestRPC}-${latestTxsES}
             IF      ${diff}>${diffError}
                 push text to discord    ${channelID}    ${botToken}
-                ...                     :scroll: Transaction ES (${latestTxsES}) delay ${diff} blocks with RPC (${latestRPC})
+                ...                     :scroll: Transaction (${latestTxsES}) delay ${diff} blocks with RPC (${latestRPC})
             END
         ELSE
                 ${count500Error}    Evaluate    ${count500Error}+1
@@ -88,7 +88,7 @@ realtime checker
             ${diff}                 Evaluate    ${latestRPC}-${latestTransferES}
             IF      ${diff}>${diffError}
                 push text to discord    ${channelID}    ${botToken}
-                ...                     :notepad_spiral: Token transfer ES (${latestTransferES}) delay ${diff} blocks with RPC (${latestRPC})
+                ...                     :notepad_spiral: Token transfer (${latestTransferES}) delay ${diff} blocks with RPC (${latestRPC})
             END
         ELSE
                 ${count500Error}    Evaluate    ${count500Error}+1
@@ -96,7 +96,7 @@ realtime checker
         ${status}           run api and make sure success    get token balance from es
         IF  ${status}==True
             IF  ${changeCount}<1
-                push text to discord    ${channelID}    ${botToken}
+                push text to discord    ${channelID}    917989107475546133
                 ...                     :moneybag: Token balance ES donot update
             END
         ELSE
@@ -105,16 +105,15 @@ realtime checker
         ${status}       run api and make sure success          get stats from redis
         IF  ${status}==True
             IF  ${verifyRedis}!=True
-                    push text to discord    ${channelID}    ${botToken}
-                    ...                     :x: Something wrong with redis, please check.
+                    push text to discord    ${channelID}    917989107475546133
+                    ...                     :x: Something wrong with `/stats`.
             END
         ELSE
-            push text to discord    ${channelID}    ${botToken}
-                    ...                     :x: Cannot call redis, please check https://explorer.roninchain.com/api/txs/stats.
+            ${count500Error}    Evaluate    ${count500Error}+1
         END
     END
     IF      ${count500Error}>1
-        push text to discord    ${channelID}    ${botToken}     :alarm_clock: Realtime checker: ES api got exception ${count500Error}/4 times
+        push text to discord    ${channelID}    917989107475546133     :alarm_clock: Realtime checker: ES api got exception ${count500Error}/5 times
     END
 
 *** Test Cases ***
