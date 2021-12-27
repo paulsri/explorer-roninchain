@@ -1,7 +1,7 @@
 # I. OVERVIEW:
 
 - Automation for Explorer Roninchain
-- Report test result to discord: https://discord.gg/e7eKWJKU5S
+- Report test result to discord
 
 # II. SET UP:
 
